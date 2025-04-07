@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HostelConnect/signin</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="container">
+        <h2 class="container-header">SIGN IN</h2>
+        <form id="signin-form">
+            <label>Email</label>
+            <input type="email" name="email" id="signin-email"  required>
+            <label>Password</label>
+            <input type="password" name="password" id="signin-password"  required>
+            <button type="submit" class="form-button" id="signin-button">Sign In</button>
+        </form>
+        <div style="width: 100%;background-color: rgba(44, 44, 44, 0.255);height: 3px;"></div>
+        <p style="text-align: center; font-size: 15px; color: rgb(255, 0, 0);">Don't have an account?</p>
+        <a href='./signup.html' class="pop-style sign-up-text" ><h3>Create Account</h3></a>
+    </div>
+    <script src="script.js" type="module"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+  apiKey: "AIzaSyD2VcyHbXk712WzpgBsK-YSZS8fu4422ro",
+  authDomain: "hostels-aa566.firebaseapp.com",
+  projectId: "hostels-aa566",
+  storageBucket: "hostels-aa566.appspot.com",
+  messagingSenderId: "577790470656",
+  appId: "1:577790470656:web:edea14946db0f031ac06e5",
+  measurementId: "G-ZGGCS3TFKD"
+};
+
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        const signinEmail = document.getElementById('signin-email');
+        const signinPasswd = document.getElementById('signin-password');
+        const signinForm = document.getElementById('signin-form');
+        const signinButton = document.getElementById('signin-button');
+
+        let currentUser = JSON.parse(localStorage.getItem('currentUser')) 
+        let signedin = JSON.parse(localStorage.getItem('signedin'))
+
+
+        const signIn = async (event) => {
+            event.preventDefault();
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, signinEmail.value, signinPasswd.value);
+                const user = userCredential.user;
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    currentUser = { name: userData.name, email: userData.email, gender: userData.gender };
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    signedin = 1;
+                    localStorage.setItem('signedin', JSON.stringify(signedin));
+
+                    window.location.href = 'index.html';
+                } else {
+                    alert('User not found!');
+                }
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+        if (signinForm) {
+            signinForm.addEventListener('submit', signIn);
+        }
+
+</script>
+</body>
+
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HostelConnect/signup</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="container">
+        <h2 class="container-header" style="text-align: center;">CREATE ACCOUNT</h2>
+        <form id="signup-form">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+            
+            <label for="age">Age:</label>
+            <input type="number" id="age" name="age" required>
+            
+            <label for="phone">Phone Number:</label>
+            <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" required>
+            
+            <label for="gender">Gender:</label>
+            <select id="gender" name="gender" style="height: 30px;" required>
+                <option value="">Select</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+
+            <label>Email</label>
+            <input type="email" name="email" id="signup-email" required>
+            <label>Password</label>
+            <input type="password" name="password" id="signup-password" required>
+
+            <button type="submit" class="form-button" id="form-button">Create</button>
+        </form>
+        <div style="width: 100%;background-color: rgba(44, 44, 44, 0.255);height: 3px;"></div>
+        <p style="text-align: center; font-size: 15px; color: rgb(0, 0, 0);">Already have an account?</p>
+        <a href='./signin.html' class="pop-style sign-up-text"><h3>SIGN IN</h3></a>
+    </div>
+    <script src='script.js' type='module'></script> 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+  apiKey: "AIzaSyD2VcyHbXk712WzpgBsK-YSZS8fu4422ro",
+  authDomain: "hostels-aa566.firebaseapp.com",
+  projectId: "hostels-aa566",
+  storageBucket: "hostels-aa566.appspot.com",
+  messagingSenderId: "577790470656",
+  appId: "1:577790470656:web:edea14946db0f031ac06e5",
+  measurementId: "G-ZGGCS3TFKD"
+};
+
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        const name = document.getElementById('name');
+        const age = document.getElementById('age');
+        const phone = document.getElementById('phone');
+        const gender = document.getElementById('gender');
+        const signupEmail = document.getElementById('signup-email');
+        const signupPasswd = document.getElementById('signup-password');
+        const signupForm = document.getElementById('signup-form');
+
+        let currentUser = JSON.parse(localStorage.getItem('currentUser')) 
+        let signedin = JSON.parse(localStorage.getItem('signedin'))
+
+        const signUp = async (event) => {
+            event.preventDefault();
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, signupEmail.value, signupPasswd.value);
+                const user = userCredential.user;
+                await setDoc(doc(db, "users", user.uid), {
+                    name: name.value,
+                    age: age.value,
+                    phone: phone.value,
+                    gender: gender.value,
+                    email: signupEmail.value,
+                    password : signupPasswd.value
+                });
+                signedin = 1;
+                localStorage.setItem('signedin', JSON.stringify(signedin));
+                currentUser = { name: name.value, email: signupEmail.value, gender: gender.value };
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+                window.location.href = 'index.html';
+            } catch (e) {
+                console.error("Error signing up: ", e);
+                alert(e.message);
+            }
+        
+        }
+        if (signupForm) {
+            signupForm.addEventListener('submit', signUp);
+        }
+
+    </script>
+</body>
+</html>
